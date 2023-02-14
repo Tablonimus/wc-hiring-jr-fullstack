@@ -8,7 +8,7 @@ However, if you have any questions, please send us an email
 to support@webcat.app with the subject "Jr Fullstack Test Questions"
 */
 
-import $t from './libs/test.js'
+import $t from "./libs/test.js";
 
 /*
 1. Data manipulation:
@@ -33,12 +33,56 @@ import $t from './libs/test.js'
   Hint: Use native array methods as well as
     Lodash(https://lodash.com/docs) modules.
 */
-import _ from 'lodash'
-const source = $t.source(1)
+import _ from "lodash";
+const source = $t.source(1);
 $t.answer(1, async () => {
   // Your code goes here
-  return 
-})
+  let expenses = [];
+  let incomes = [];
+
+  let type = source.filter((data) =>
+    data.type === "expense"
+      ? expenses.push(data.amount)
+      : data.type === "income"
+      ? incomes.push(data.amount)
+      : false
+  );
+
+  let balance =
+    incomes.reduce((a, b) => a + b, 0) - expenses.reduce((a, b) => a + b, 0);
+
+  let targetCategories = {};
+
+  let allCategories = [];
+  source.filter((data) =>
+    allCategories.includes(data.category)
+      ? false
+      : allCategories.push(data.category)
+  );
+
+  for (let i = 0; i < allCategories.length; i++) {
+    let totalAmount = 0;
+    for (let x = 0; x < source.length; x++) {
+      if (allCategories[i] === source[x].category) {
+        totalAmount = totalAmount + source[x].amount;
+        targetCategories = {
+          ...targetCategories,
+          [source[x].category]:
+            source[x].type === "expense" ? totalAmount * -1 : totalAmount,
+        };
+      }
+    }
+  }
+
+  const targetData = {
+    balance: balance,
+    income: incomes.reduce((a, b) => a + b, 0),
+    expenses: expenses.reduce((a, b) => a + b, 0),
+    byCategories: targetCategories,
+  };
+
+  return targetData;
+});
 
 /*
 2. Asynchronous programming: 
@@ -47,11 +91,19 @@ $t.answer(1, async () => {
   3. Finally, return the list of resulting texts as an array.
     
 */
-const $source = $t.source(2)
+const $source = $t.source(2);
 $t.answer(2, async () => {
-    // Your code goes here:
-    // 1. Get ids: $source.getIds()
-    // 2. Get text for every id: $source.getText(id)
-    // 3. Return array of texts
-    return 
-})
+  // Your code goes here:
+  // 1. Get ids: $source.getIds()
+  // 2. Get text for every id: $source.getText(id)
+  // 3. Return array of texts
+
+  const getIds = await $source.getIds();
+  const promises = [];
+  getIds.map((id) => promises.push($source.getText(id)));
+
+  const response = Promise.all(promises)
+    .then((res) => res)
+    .catch((err) => console.log(err));
+  return response;
+});
